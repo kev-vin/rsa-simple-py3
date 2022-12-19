@@ -1,4 +1,6 @@
 import secrets
+import math
+import sys
 
 DEFAULT_WITNESS_COUNT = 40
 secure_rng = secrets.SystemRandom()
@@ -128,7 +130,7 @@ def generate_keypair(size):
     p = find_prime(prime_size)
     q = find_prime(prime_size)
     n = p*q
-    # carmichael function (p, q) = lcm(p-1, q-1) bc euler's totient(p) = p-1
+    # carmichael function (p, q) = lcm(p-1, q-1)
     lam = lcm(p-1, q-1)
     # choose an e that is coprime with lamda
     e = (2 ^ 16) + 1
@@ -145,12 +147,19 @@ def encrypt(public_key, plaintext):
     Encrypts text given public_key = tuple(n, e)
     """
     n, e = public_key
+    if type(plaintext) == str:
+        plaintext = int.from_bytes(plaintext.encode(), byteorder=sys.byteorder)
     return modular_pow(plaintext, e, n)
 
 
-def decrypt(private_key, encrypted_text):
+def decrypt(private_key, encrypted_text, type=str):
     """
     Decrypts text given private_key = d
     """
     n, d = private_key
-    return modular_pow(encrypted_text, d, n)
+    plainint = modular_pow(encrypted_text, d, n)
+    if type == str:
+        length = math.ceil(plainint.bit_length() / 8)
+        data = plainint.to_bytes(length, sys.byteorder)
+        return data.decode()
+    return plainint
