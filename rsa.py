@@ -1,6 +1,7 @@
 import secrets
 import math
 import sys
+from pem import write_private_key, write_public_key
 
 
 class SimpleRSA:
@@ -135,6 +136,7 @@ class SimpleRSA:
         public_key = (n, e)
         d = self._mod_mult_inverse(e, lam)
         private_key = (n, d)
+        self.public_key, self.private_key = public_key, private_key
         return public_key, private_key
 
     def encrypt(self, plaintext):
@@ -167,32 +169,32 @@ class SimpleRSA:
 
     def save_public_key(self, path):
         """
-        Saves a public key to ASN.1 PEM format (rfc 7468)
-        https://www.rfc-editor.org/rfc/rfc7468
+        Saves a public key to PKCS#1 PEM format (rfc 8017)
+        https://datatracker.ietf.org/doc/html/rfc8017
         """
         if not self.public_key:
             raise Exception("No public key is set")
-        pass
+        write_public_key(self.public_key, path)
 
     def save_private_key(self, path):
         """
-        Saves a private key to ASN.1 PEM format (rfc 7468)
-        https://www.rfc-editor.org/rfc/rfc7468
+        Saves a private key to PKCS#1 PEM format (rfc 8017)
+        https://datatracker.ietf.org/doc/html/rfc8017
         """
         if not self.private_key:
             raise Exception("No private key is set")
-        pass
+        write_private_key(self.private_key, path)
 
     def load_public_key(self, path):
         """
-        Loads a ASN.1 PEM formatted public key (rfc 7468)
-        https://www.rfc-editor.org/rfc/rfc7468
+        Loads a PKCS#1 PEM formatted public key (rfc 8017)
+        https://datatracker.ietf.org/doc/html/rfc8017#section-3.2
         """
         pass
 
     def load_private_key(self, path):
         """
-        Loads a ASN.1 PEM formatted private key (rfc 7468)
-        https://www.rfc-editor.org/rfc/rfc7468
+        Loads a PKCS#1 PEM formatted private key (rfc 8017)
+        https://datatracker.ietf.org/doc/html/rfc8017#section-3.2
         """
         pass
