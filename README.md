@@ -26,20 +26,38 @@ The Miller-Rabin primality test relies on the fact that for prime modulus $p$ an
 The Carmichael function $\lambda(n)$ is the $m$ such that the degree mod $n$ of all numbers coprime to $n$ is $m$. We need this value to compute our multiplicative inverse exponent $d$ from our encryption exponent $e$ such that
 $$ed \equiv 1 \text{ (mod $\lambda(n)$)}$$
 Because $p, q$ prime, this is simply $\lambda(n) = \text{lcm}(p-1, q-1)$
-Some implementations use Euler's totient $\phi(n) = (p-1)(q-1)$, but by using the Carmichael function, we can potentially yield a smaller value, which makes our computations more efficient.
+Some implementations use Euler's totient $\phi(n) = (p-1)(q-1)$, but by using the Carmichael function, we can potentially yield a smaller value, which makes our computations more efficient. Either function is ok, because Euler's theorem holds for both.
 
 In this implementation, I calculate the lcm using the following identity (and the gcd given by the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm#Procedure))
 $$\text{lcm(a, b)} = \frac{ab}{\text{gcd(a, b)}}$$
 
 We choose our encryption exponent $e$ as a number coprime with $\lambda(n)$, as if they were not coprime, there would not be a unique inverse.
 
-Finally, we need to calculate our inverse exponent $d$, so that we can recover our original message after it is raised to $d$ (mod n), which we calculate using the [extended euclidean algorithm & bezout's identity](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse).
+Finally, we need to calculate our inverse exponent $d$, so that we can recover our original message after it is raised to $d$ (mod n). This is the inverse of $e$ mod $\lambda(n)$. Why is that? We want $(m^e)^d \equiv m$ (mod $n$). Euler's theorem gives us:
+
+$a^{\lambda(n)} \equiv 1$ (mod $n$)
+
+$a^{\lambda(n)+1} \equiv a$ (mod $n$)
+
+So we need the exponents to be equal:
+
+$ed = \lambda(n) + 1$
+
+But we can raise both sides of Euler's theorem to any exponent and it will still hold, so we just need to satisfy:
+
+$ed \equiv 1 $(mod $\lambda(n)$)
+
+So $d$ is the modular multiplicative inverse of $e$ (mod $\lambda(n)$)
 
 ### The Keys
 
 The public key is comprised of the modulus $n=pq$ and the exponent $e$.
 
 The private key is $d$, the multiplicative inverse of $e$. In my implementation, I also include the modulus $n$ as part of the private key so that we can decrypt without the public key.
+
+Why is this secure?
+
+If $e$ and $n$ are known, $d$ is the multiplicative ivnerse of $e$ mod $\lambda(n)$. But $\lambda(n)$ = $lcm(p, q)$. The only way to get $p, q$ is to factor $n$, which is impossibly difficult.
 
 ## Encryption & decryption
 
